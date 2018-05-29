@@ -25,6 +25,7 @@
 #import "Functions/RequestFunction.h"
 #import "Functions/ShareFunction.h"
 #import "Functions/GetSDKVersion.h"
+#import "Data/AIRVKEvent.h"
 
 static BOOL airVKLogEnabled = NO;
 FREContext airVKExtContext = nil;
