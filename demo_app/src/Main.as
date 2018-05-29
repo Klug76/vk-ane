@@ -7,6 +7,13 @@ package {
     import com.marpies.utils.Logger;
     import com.marpies.utils.ObjectUtils;
     import com.marpies.utils.VerticalLayoutBuilder;
+	import flash.desktop.NativeApplication;
+	import flash.events.InvokeEvent;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
+	import flash.net.URLRequestMethod;
+	import flash.net.URLVariables;
+	import flash.system.Capabilities;
 
     import feathers.controls.Button;
     import feathers.controls.LayoutGroup;
@@ -18,7 +25,7 @@ package {
     public class Main extends LayoutGroup {
 
         /* Your VK.com app ID goes here */
-        private static const VK_APP_ID:String = null;
+        private static const VK_APP_ID:String = "5622047";
 
         private var mLogoutBtn:Button;
         private var mAuthBtn:Button;
@@ -26,20 +33,26 @@ package {
         private var mGetAppPermissionsRequestBtn:Button;
         private var mWallPostRequestBtn:Button;
         private var mShareBtn:Button;
+		private var copyLogBtn:Button;
+		private var loader_: URLLoader;
 
         public function Main() {
             super();
 
             if( VK_APP_ID === null ) throw new Error( "You must specify VK_APP_ID in Main.as" );
+			Logger.log("AIR ver=" + Capabilities.playerType + " " + Capabilities.version);
+			Logger.log("VK app id=" + VK_APP_ID);
 
             new MetalWorksMobileTheme();
         }
 
-        public function start():void {
+        public function start():void
+		{
             layout = new VerticalLayoutBuilder()
                     .setGap( 10 )
-                    .setHorizontalAlign( VerticalLayout.HORIZONTAL_ALIGN_CENTER )
-                    .setVerticalAlign( VerticalLayout.VERTICAL_ALIGN_MIDDLE )
+					.setPadding( 16 )
+                    .setHorizontalAlign( VerticalLayout.HORIZONTAL_ALIGN_RIGHT )
+                    .setVerticalAlign( VerticalLayout.VERTICAL_ALIGN_TOP )
                     .build();
             width = Constants.stageWidth;
             height = Constants.stageHeight;
@@ -83,9 +96,37 @@ package {
             mShareBtn.addEventListener( Event.TRIGGERED, onShareBtnTriggered );
             addChild( mShareBtn );
 
+
+            copyLogBtn = new Button();
+            copyLogBtn.label = "Copy Log";
+            copyLogBtn.addEventListener( Event.TRIGGERED, onCopyLogTriggered );
+            addChild( copyLogBtn );
+
+
+			Logger.addWindow(this, width * 0.75, height);
+
+            //NativeApplication.nativeApplication.addEventListener( InvokeEvent.INVOKE, onInvoke);
+
+
+			if (!VK.isSupported)
+			{
+				Logger.log("vk NOT supported");
+				return;
+			}
             VK.addAccessTokenUpdateCallback( onAccessTokenUpdated );
-            VK.init( VK_APP_ID, true );
+            VK.init( VK_APP_ID, my_log );
         }
+
+		//private function onInvoke(e: InvokeEvent): void
+		//{
+			//var arr: Array = e.arguments as Array;
+			//Logger.log("InvokeEvent.INVOKE: " + arr.join("; ") + ".");
+		//}
+
+		private function my_log(s: String): void
+		{
+			Logger.log(s);
+		}
 
         /**
          *
@@ -96,7 +137,8 @@ package {
          */
 
         private function onAuthBtnTriggered():void {
-            VK.authorize( new <String>[ VKPermissions.FRIENDS, VKPermissions.WALL ], onAuthResult );
+            //VK.authorize( new <String>[ VKPermissions.FRIENDS, VKPermissions.WALL ], onAuthResult );
+			VK.authorize( new <String>[ VKPermissions.FRIENDS, VKPermissions.OFFLINE ], onAuthResult );
         }
 
         private function onLogoutBtnTriggered():void {
@@ -145,6 +187,18 @@ package {
                     .showDialog();
         }
 
+        private function onCopyLogTriggered():void
+		{
+			var uri: String = "http://192.168.1.6/log/log.php";
+			//"?txt="
+			var req: URLRequest = new URLRequest(uri);
+			var post: URLVariables = new URLVariables();
+			post["txt"] = Logger.getAllLogs();
+			req.method = URLRequestMethod.POST;
+			req.data = post;
+			loader_ = new URLLoader();
+			loader_.load(req);
+		}
         /**
          *
          *

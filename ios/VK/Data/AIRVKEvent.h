@@ -26,5 +26,6 @@ static NSString* const VK_REQUEST_SUCCESS = @"vkRequestSuccess";
 static NSString* const VK_REQUEST_ERROR = @"vkRequestError";
 static NSString* const VK_SHARE_COMPLETE = @"vkShareComplete";
 static NSString* const VK_SHARE_CANCEL = @"vkShareCancel";
+static NSString* const VK_LOG = @"vkLog";
 
 #endif /* AIRVKEvent_h */

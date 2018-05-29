@@ -49,7 +49,6 @@
 		C3376BFC1D08109300A8BCA5 /* VKResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BAF1D08109300A8BCA5 /* VKResponse.m */; };
 		C3376BFD1D08109300A8BCA5 /* VKImageParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BB21D08109300A8BCA5 /* VKImageParameters.m */; };
 		C3376BFE1D08109300A8BCA5 /* VKUploadImage.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BB41D08109300A8BCA5 /* VKUploadImage.m */; };
-		C3376BFF1D08109300A8BCA5 /* NSData+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BB71D08109300A8BCA5 /* NSData+MD5.m */; };
 		C3376C001D08109300A8BCA5 /* NSString+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BB91D08109300A8BCA5 /* NSString+MD5.m */; };
 		C3376C011D08109300A8BCA5 /* OrderedDictionary.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BBB1D08109300A8BCA5 /* OrderedDictionary.m */; };
 		C3376C021D08109300A8BCA5 /* VKUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = C3376BBD1D08109300A8BCA5 /* VKUtil.m */; };
@@ -175,8 +174,6 @@
 		C3376BB21D08109300A8BCA5 /* VKImageParameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VKImageParameters.m; sourceTree = "<group>"; };
 		C3376BB31D08109300A8BCA5 /* VKUploadImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VKUploadImage.h; sourceTree = "<group>"; };
 		C3376BB41D08109300A8BCA5 /* VKUploadImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VKUploadImage.m; sourceTree = "<group>"; };
-		C3376BB61D08109300A8BCA5 /* NSData+MD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+MD5.h"; sourceTree = "<group>"; };
-		C3376BB71D08109300A8BCA5 /* NSData+MD5.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+MD5.m"; sourceTree = "<group>"; };
 		C3376BB81D08109300A8BCA5 /* NSString+MD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+MD5.h"; sourceTree = "<group>"; };
 		C3376BB91D08109300A8BCA5 /* NSString+MD5.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+MD5.m"; sourceTree = "<group>"; };
 		C3376BBA1D08109300A8BCA5 /* OrderedDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrderedDictionary.h; sourceTree = "<group>"; };
@@ -441,8 +438,6 @@
 		C3376BB51D08109300A8BCA5 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				C3376BB61D08109300A8BCA5 /* NSData+MD5.h */,
-				C3376BB71D08109300A8BCA5 /* NSData+MD5.m */,
 				C3376BB81D08109300A8BCA5 /* NSString+MD5.h */,
 				C3376BB91D08109300A8BCA5 /* NSString+MD5.m */,
 				C3376BBA1D08109300A8BCA5 /* OrderedDictionary.h */,
@@ -567,7 +562,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3376BEE1D08109300A8BCA5 /* VKUploadMessagesPhotoRequest.m in Sources */,
-				C3376BFF1D08109300A8BCA5 /* NSData+MD5.m in Sources */,
 				C3376BE41D08109300A8BCA5 /* VKCounters.m in Sources */,
 				C3376C0B1D08109300A8BCA5 /* VKBatchRequest.m in Sources */,
 				C3376BF71D08109300A8BCA5 /* VKJSONOperation.m in Sources */,
@@ -675,7 +669,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -712,7 +706,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
@@ -726,7 +720,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/VK/Frameworks",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -740,7 +734,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/VK/Frameworks",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

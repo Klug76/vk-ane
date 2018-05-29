@@ -32,18 +32,19 @@ static NSString* airVKAuthPermissionsKey = @"vkAuthPermissions";
 
 @implementation AIRVK
 
-+ (void) dispatchEvent:(const NSString*) eventName {
++ (void) dispatchEvent:(NSString*) eventName {
     [self dispatchEvent:eventName withMessage:@""];
 }
 
-+ (void) dispatchEvent:(const NSString*) eventName withMessage:(NSString*) message {
++ (void) dispatchEvent:(NSString*) eventName withMessage:(NSString*) message {
     NSString* messageText = message ? message : @"";
     FREDispatchStatusEventAsync( airVKExtContext, (const uint8_t*) [eventName UTF8String], (const uint8_t*) [messageText UTF8String] );
 }
 
-+ (void) log:(const NSString*) message {
++ (void) log:(NSString*) message {
     if( airVKLogEnabled ) {
-        NSLog( @"[iOS-VK] %@", message );
+        //NSLog( @"[iOS-VK] %@", message );
+		[AIRVK dispatchEvent:VK_LOG withMessage:message];
     }
 }
 

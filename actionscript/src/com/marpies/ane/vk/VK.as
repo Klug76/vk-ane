@@ -35,6 +35,7 @@ package com.marpies.ane.vk {
 
         /* Misc */
         private static var mLogEnabled:Boolean;
+        private static var mLog:Function;
         private static var mInitialized:Boolean;
 
         /* Callbacks */
@@ -55,6 +56,7 @@ package com.marpies.ane.vk {
         private static const VK_SHARE_COMPLETE:String = "vkShareComplete";
         private static const VK_SHARE_CANCEL:String = "vkShareCancel";
         private static const VK_SHARE_ERROR:String = "vkShareError";
+        private static const VK_LOG:String = "vkLog";
 
         /**
          * @private
@@ -80,13 +82,14 @@ package com.marpies.ane.vk {
          *
          * @return <code>true</code> if the extension context was created, <code>false</code> otherwise
          */
-        public static function init( appId:String, showLogs:Boolean = false ):Boolean {
+        public static function init( appId:String, logfn:Function = null ):Boolean {
             if( !isSupported ) return false;
             if( mInitialized ) return true;
 
             if( appId === null ) throw new ArgumentError( "Parameter appId cannot be null." );
 
-            mLogEnabled = showLogs;
+            mLogEnabled = logfn != null;
+			mLog = logfn;
 
             /* Initialize context */
             if( !initExtensionContext() ) {
@@ -105,7 +108,7 @@ package com.marpies.ane.vk {
             mContext.addEventListener( StatusEvent.STATUS, onStatus );
 
             /* Call init */
-            mContext.call( "init", appId, showLogs );
+            mContext.call( "init", appId, mLogEnabled );
             mInitialized = true;
             return true;
         }
@@ -288,7 +291,7 @@ package com.marpies.ane.vk {
 
         internal static function showShareDialogInternal( params:VKShareParameters ):void {
             log( "VK::showShareDialogInternal()" );
-            
+
             /* Store callbacks */
             mShareCompleteCallback = params.completeCallback;
             mShareCancelCallback = params.cancelCallback;
@@ -450,6 +453,9 @@ package com.marpies.ane.vk {
                     }
                     removeShareCallbacks();
                     return;
+				case VK_LOG:
+					log(event.level);
+					return;
             }
         }
 
@@ -479,7 +485,8 @@ package com.marpies.ane.vk {
 
         private static function log( message:String ):void {
             if( mLogEnabled ) {
-                trace( TAG, message );
+                //trace( TAG, message );
+				mLog(message);
             }
         }
 
