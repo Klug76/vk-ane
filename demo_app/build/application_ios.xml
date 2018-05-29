@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<application xmlns="http://ns.adobe.com/air/application/30.0">
+    <id>com.gs.aqualife3d</id>
+    <versionNumber>1.4.3</versionNumber>
+	<supportedProfiles>mobileDevice</supportedProfiles>
+    <filename>AquaLife 3D</filename>
+    <name>AquaLife 3D</name>
+	<description>AquaLife 3D</description>
+	<copyright>Gladiators Software</copyright>
+
+    <iPhone>
+        <requestedDisplayResolution>high</requestedDisplayResolution>
+
+        <InfoAdditions><![CDATA[
+            <key>LSApplicationQueriesSchemes</key>
+            <array>
+                <string>vk</string>
+                <string>vk-share</string>
+                <string>vkauthorize</string>
+            </array>
+
+			<key>NSAppTransportSecurity</key>
+			<dict>
+				<key>NSExceptionDomains</key>
+				<dict>
+					<key>vk.com</key>
+					<dict>
+						<key>NSIncludesSubdomains</key>
+						<true/>
+						<key>NSThirdPartyExceptionRequiresForwardSecrecy</key>
+						<false/>
+					</dict>
+				</dict>
+			</dict>
+
+            <key>CFBundleURLTypes</key>
+            <array>
+				<dict>
+					<key>CFBundleURLSchemes</key>
+					<array>
+						<string>vk5622047</string>
+					</array>
+				</dict>
+            </array>
+
+
+            <key>UIDeviceFamily</key>
+            <array>
+                <!-- iPhone and iPod touch devices -->
+                <string>1</string>
+                <!-- iPad devices -->
+                <string>2</string>
+            </array>
+
+            <key>MinimumOSVersion</key>
+            <string>10.0</string>
+        ]]></InfoAdditions>
+    </iPhone>
+
+    <!-- Settings for the application's initial window. Required. -->
+    <initialWindow>
+		<title>AquaLife 3D</title>
+        <content>AquaLife.swf</content>
+        <visible>true</visible>
+        <aspectRatio>landscape</aspectRatio>
+        <autoOrients>true</autoOrients>
+        <fullScreen>false</fullScreen>
+        <depthAndStencil>true</depthAndStencil>
+        <renderMode>direct</renderMode>
+    </initialWindow>
+
+    <!--<icon>
+        <image16x16></image16x16>
+        <image29x29></image29x29>
+        <image32x32></image32x32>
+        <image36x36></image36x36>
+        <image40x40></image40x40>
+        <image48x48></image48x48>
+        <image50x50></image50x50>
+        <image57x57></image57x57>
+        <image58x58></image58x58>
+        <image60x60></image60x60>
+        <image72x72></image72x72>
+        <image76x76></image76x76>
+        <image80x80></image80x80>
+        <image96x96></image96x96>
+        <image100x100></image100x100>
+        <image114x114></image114x114>
+        <image120x120></image120x120>
+        <image128x128></image128x128>
+        <image144x144></image144x144>
+        <image152x152></image152x152>
+        <image512x512></image512x512>
+        <image732x412></image732x412>
+        <image1024x1024></image1024x1024>
+    </icon>-->
+
+    <extensions>
+        <extensionID>com.marpies.ane.vk</extensionID>
+    </extensions>
+</application>

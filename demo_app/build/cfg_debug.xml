@@ -1,0 +1,7 @@
+<?xml version="1.0" standalone="yes"?>
+<flex-config>
+	<compiler>
+		<verbose-stacktraces>true</verbose-stacktraces>
+		<inline>false</inline>
+	</compiler>
+</flex-config>

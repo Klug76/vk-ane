@@ -1,0 +1,19 @@
+<extension xmlns="http://ns.adobe.com/air/extension/30.0">
+
+  <id>com.marpies.ane.vk</id>
+  <versionNumber>1.2.1</versionNumber>
+
+  <platforms>
+    <platform name="iPhone-ARM">
+        <applicationDeployment>
+            <nativeLibrary>libVK.a</nativeLibrary>
+            <initializer>VKInitializer</initializer>
+            <finalizer>VKFinalizer</finalizer>
+        </applicationDeployment>
+    </platform>
+
+    <platform name="default">
+        <applicationDeployment/>
+    </platform>
+  </platforms>
+</extension>

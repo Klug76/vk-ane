@@ -1,0 +1,169 @@
+<?xml version="1.0" standalone="yes"?>
+<project name="AquaLife" default="main" basedir=".">
+	<property environment="env" />
+	<fail unless="env.AIR_SDK_HOME" message="AIR_SDK_HOME needs to be defined as an environment variable or in the Ant build." />
+	<property name="AIR_SDK_HOME" location="${env.AIR_SDK_HOME}"/>
+
+	<property name="APP_NAME" value="${ant.project.name}"/>
+	<property name="PROJECT.dir" location="${basedir}/.."/>
+	<property name="BIN.dir" location="${PROJECT.dir}/bin"/>
+	<property name="DIST.dir" location="${PROJECT.dir}/dist"/>
+	<property name="OUTPUT_SWF" location="${BIN.dir}/${APP_NAME}.swf"/>
+	<property name="SIMULATOR_SDK" value="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator11.2.sdk"/>
+	<property name="IOS_APP_ID" value="com.gs.aqualife3d"/>
+	<property name="IOS_CERT_DEV" value="${PROJECT.dir}/cert/iphone_dev.p12"/>
+	<property name="IOS_CERT_DEV_PASS" value="ghfdj123"/>
+	<property name="IOS_PROVISION_DEV" value="${PROJECT.dir}/cert/Development_profile_AquaLife_3D.mobileprovision"/>
+
+	<echo>JAVA_HOME=${java.home}</echo>
+	<!--<property name="ADB_TOOL" value="${AIR_SDK_HOME}/lib/android/bin/adb.exe"/>-->
+	<property name="ADB_TOOL" value="${env.ADB_TOOL}"/>
+	<echo>ADB_TOOL=${ADB_TOOL}</echo>
+	<xmlproperty file="${AIR_SDK_HOME}/airsdk.xml"/>
+	<property name="swfVersionList" value="${airSdk.applicationNamespaces.versionMap.swfVersion}"/>
+	<property name="descriptorList" value="${airSdk.applicationNamespaces.versionMap.descriptorNamespace}"/>
+	<script language="javascript">
+	<![CDATA[
+		arr = project.getProperty('swfVersionList').split(',');
+		project.setProperty('SWF_VERSION', arr[0]);
+		arr = project.getProperty('descriptorList').split(',');
+		project.setProperty('XML_DESCRIPTOR', arr[0]);
+	]]>
+	</script>
+
+	<taskdef resource="flexTasks.tasks" classpath="${AIR_SDK_HOME}/ant/lib/flexTasks.jar"/>
+
+	<tstamp>
+		<format property="BUILD.time" pattern="ddMMyyyyHHmmss" locale="en"/>
+	</tstamp>
+
+	<target name="main" depends="clean, swf-debug, ipa-dev"/>
+
+	<target name="clean" depends="clean-swf, clean-obj, clean-dist"/>
+
+	<target name="clean-swf">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${BIN.dir}" defaultexcludes="false">
+				<include name="**/*.swf" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="clean-obj">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${PROJECT.dir}/obj" defaultexcludes="false">
+				<include name="**/swf-dump*.xml" />
+			</fileset>
+		</delete>
+	</target>
+	
+	<target name="clean-dist">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="${DIST.dir}" defaultexcludes="false">
+				<include name="**/*" />
+			</fileset>
+		</delete>
+	</target>
+<!-- =================================================================================================================================== -->
+	<target name="swf-debug">
+		<echo>
+			swf-version="${SWF_VERSION}"
+		</echo>
+		<mxmlc file="${PROJECT.dir}/src/Startup.as" output="${OUTPUT_SWF}" failonerror="true"
+				configname="airmobile"
+				dump-config="${PROJECT.dir}/obj/swf-dump-debug.xml"
+				debug="true"
+				compiler.debug="true"
+				swf-version="${SWF_VERSION}"
+				default-background-color="#408080"
+				default-frame-rate="60"
+				use-network="true"
+			   >
+			<!--	compiler.optimize="true"-->
+			<load-config filename="${PROJECT.dir}/build/cfg_debug.xml" append="true"/>
+			<!--<frame label="start" classname="Main"/>-->
+			<library-path dir="${AIR_SDK_HOME}" append="true">
+				<include name="frameworks/libs"/>
+			</library-path>
+			<library-path dir="${AIR_SDK_HOME}" append="true">
+				<include name="frameworks/libs/air"/>
+			</library-path>
+			<library-path dir="${PROJECT.dir}/lib" includes="*.swc" append="true"/>
+			<default-size width="640" height="420"/>
+			<define name="CONFIG::air" value="true"/>
+			<define name="CONFIG::not_air" value="false"/>
+			<define name="CONFIG::debug" value="true"/>
+			<define name="CONFIG::local_test" value="true"/>
+			<define name="CONFIG::console" value="true"/>
+			<define name="CONFIG::timeStamp" value="${BUILD.time}"/>
+			<define name="advanced-telemetry" value="true"/>
+			<define name="omit-trace-statements" value="false"/>
+		</mxmlc>
+	</target>
+
+<!-- =================================================================================================================================== -->
+	<target name="ipa-dev">
+		<replaceregexp file="application_ios.xml" match="http://ns.adobe.com/air/application/[0-9]+.0" replace="${XML_DESCRIPTOR}" byline="true" encoding="utf-8"/>
+		<java jar="${AIR_SDK_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg line="-package"/>
+			<arg line="-target ipa-debug-interpreter"/>
+			<arg line="-storetype pkcs12"/>
+			<arg line="-keystore ${IOS_CERT_DEV}"/>
+			<arg line="-storepass ${IOS_CERT_DEV_PASS}"/>
+			<arg line="-provisioning-profile ${IOS_PROVISION_DEV}"/>
+			<arg line="${DIST.dir}/${APP_NAME}-debug.ipa"/>
+			<arg line="application_ios.xml"/>
+			<arg line="-extdir ${PROJECT.dir}/ext"/>
+			<arg line="-C ${PROJECT.dir}/bin ."/>
+			<!--arg line="-C ${PROJECT.dir}/splash ."/>
+			<arg line="-C ${PROJECT.dir}/icons/ios ."/-->
+		</java>
+	</target>
+
+	<target name="install-dev">
+		<java jar="${AIR_SDK_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg line="-installApp"/>
+			<arg line="-platform ios"/>
+			<arg line="-package ${DIST.dir}/${APP_NAME}-debug.ipa"/>
+		</java>
+	</target>
+
+	<target name="kill-dev">
+		<java jar="${AIR_SDK_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg line="-uninstallApp"/>
+			<arg line="-platform ios"/>
+			<arg line="-appid ${IOS_APP_ID}"/>
+		</java>
+	</target>
+<!-- =================================================================================================================================== -->
+	<condition property="isMac">
+		<os family="mac" />
+	</condition>
+
+	<condition property="isWindows">
+		<os family="windows" />
+	</condition>
+
+	<target name="run_win" description="Launches app in ADL" if="isWindows">
+		<replaceregexp file="application_desktop.xml" match="http://ns.adobe.com/air/application/[0-9]+.0" replace="${XML_DESCRIPTOR}" byline="true" encoding="utf-8"/>
+		<exec executable="${AIR_SDK_HOME}/bin/adl" failonerror="true">
+			<arg line="-profile mobileDevice"/>
+			<arg line="-screensize iPhone6"/>
+			<arg line="-XscreenDPI 216"/>
+			<arg line="application_desktop.xml"/>
+			<arg line="${BIN.dir}"/>
+		</exec>
+	</target>
+	<target name="run_mac" description="Launches app in ADL" if="isMac">
+		<replaceregexp file="application_desktop.xml" match="http://ns.adobe.com/air/application/[0-9]+.0" replace="${XML_DESCRIPTOR}" byline="true" encoding="utf-8"/>
+		<exec executable="${AIR_SDK_HOME}/bin/adl" failonerror="true">
+			<arg line="-profile mobileDevice"/>
+			<arg line="-screensize iPhone6"/>
+			<arg line="-XscreenDPI 216"/>
+			<arg line="application_desktop.xml"/>
+			<arg line="${BIN.dir}"/>
+		</exec>
+	</target>
+	<target name="run" depends="run_mac, run_win"/>
+
+</project>

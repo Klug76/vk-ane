@@ -8,3 +8,9 @@ android/build
 .DS_STORE
 UserInterfaceState.xcuserstate
 ios/build
+demo_app/bin
+demo_app/cert
+demo_app/dist
+demo_app/obj
+demo_app/ext/com.marpies.ane.vk.ane
+demo_app/lib/com.marpies.ane.vk.swc

@@ -6,7 +6,7 @@
 
     <!-- All -->
     <target name="all" depends="swc,ios,android,package" description="Full build of extension"/>
-
+    <target name="iphone" depends="swc,ios,package_ios" description="iPhone only build of extension"/>
     <!--
 
     ================================================================
@@ -120,6 +120,8 @@
         <unzip src="temp/swc/${name}.swc" dest="temp/swc/content" overwrite="true"/>
         <!-- Copy .swc to bin directory -->
         <copy file="temp/swc/${name}.swc" tofile="../bin/${packageName}.swc" overwrite="true" />
+        <!-- Copy .swc to demo app -->
+        <copy file="temp/swc/${name}.swc" tofile="../demo_app/lib/${packageName}.swc" overwrite="true" />
 
         <copy file="temp/swc/content/library.swf" todir="temp/ios" overwrite="true"/>
         <copy file="temp/swc/content/library.swf" todir="temp/android" overwrite="true"/>
@@ -152,6 +154,23 @@
         <delete dir="temp/"/>
     </target>
 
+    <target name="package_ios" description="Create the ios extension package">
+        <exec executable="${flex.sdk}/bin/adt${bin.ext}" failonerror="true" dir="temp/">
+            <arg value="-package"/>
+            <arg value="-target"/>
+            <arg value="ane"/>
+            <arg value="${packageName}.ane"/>
+            <arg value="../extension_ios.xml"/>
+            <arg line="-swc swc/${name}.swc"/>
+            <arg line="-platform iPhone-ARM -platformoptions ../platform-ios.xml -C ios/ ."/>
+            <arg line="-platform default -C default/ ."/>
+        </exec>
+
+        <copy file="temp/${packageName}.ane" todir="../bin"/>
+        <copy file="temp/${packageName}.ane" todir="../demo_app/ext"/>
+
+        <delete dir="temp/"/>
+    </target>
 
 
     <!--
