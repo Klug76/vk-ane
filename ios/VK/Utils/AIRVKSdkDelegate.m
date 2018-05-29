@@ -25,11 +25,11 @@ static AIRVKSdkDelegate* vkDelegateSharedInstance = nil;
 
 typedef BOOL (*applicationOpenURLPtr)(id, SEL, UIApplication*, NSURL*, NSString*, id);
 typedef BOOL (*applicationOpenURLiOS9Ptr)(id, SEL, UIApplication*, NSURL*, NSDictionary<NSString*, id>*);
-static IMP __original_ApplicationOpenURL = NULL;
-static IMP __original_ApplicationOpenURLiOS9 = NULL;
+static IMP original_ApplicationOpenURL = nil;
+static IMP original_ApplicationOpenURL_iOS9 = nil;
 
 
-BOOL __swizzle_ApplicationOpenURL(id self, SEL _cmd, UIApplication* application, NSURL* url, NSString* sourceApplication, id annotation)
+BOOL swizzle_ApplicationOpenURL(id self, SEL sel, UIApplication* application, NSURL* url, NSString* sourceApplication, id annotation)
 {
 	NSString* uri = url.absoluteString;
 	[AIRVK log:[NSString stringWithFormat:@"*** app openURL(old)=%@", uri]];
@@ -38,10 +38,10 @@ BOOL __swizzle_ApplicationOpenURL(id self, SEL _cmd, UIApplication* application,
 		return [VKSdk processOpenURL:url fromApplication:sourceApplication];
 	}
 
-    if (__original_ApplicationOpenURL)
+    if (original_ApplicationOpenURL)
     {
 		[AIRVK log:@"*** openURL fallback(old)"];
-        return ((applicationOpenURLPtr)__original_ApplicationOpenURL)(self, _cmd, application, url, sourceApplication, annotation);
+        return ((applicationOpenURLPtr)original_ApplicationOpenURL)(self, sel, application, url, sourceApplication, annotation);
     }
     else
     {
@@ -49,7 +49,7 @@ BOOL __swizzle_ApplicationOpenURL(id self, SEL _cmd, UIApplication* application,
     }
 }
 
-BOOL __swizzle_ApplicationOpenURLiOS9(id self, SEL _cmd, UIApplication* application, NSURL* url, NSDictionary<NSString*, id>* options)
+BOOL swizzle_ApplicationOpenURL_iOS9(id self, SEL sel, UIApplication* application, NSURL* url, NSDictionary<NSString*, id>* options)
 {
 	NSString* uri = url.absoluteString;
 	[AIRVK log:[NSString stringWithFormat:@"*** app openURL(new)=%@", uri]];
@@ -58,10 +58,10 @@ BOOL __swizzle_ApplicationOpenURLiOS9(id self, SEL _cmd, UIApplication* applicat
 		return [VKSdk processOpenURL:url fromApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]];
 	}
 
-    if (__original_ApplicationOpenURLiOS9)
+    if (original_ApplicationOpenURL_iOS9)
     {
 		[AIRVK log:@"*** openURL fallback(new)"];
-        return ((applicationOpenURLiOS9Ptr)__original_ApplicationOpenURLiOS9)(self, _cmd, application, url, options);
+        return ((applicationOpenURLiOS9Ptr)original_ApplicationOpenURL_iOS9)(self, sel, application, url, options);
     }
     else
     {
@@ -93,21 +93,21 @@ BOOL __swizzle_ApplicationOpenURLiOS9(id self, SEL _cmd, UIApplication* applicat
 
 			BOOL iOS9OrGreater = [[[UIDevice currentDevice] systemVersion] intValue] >= 9;
 			SEL sel = @selector(application:openURL:sourceApplication:annotation:);
-			SEL seliOS9 = @selector(application:openURL:options:);
+			SEL sel_iOS9 = @selector(application:openURL:options:);
 
-			if ([appDelegate respondsToSelector:seliOS9] && iOS9OrGreater)
-			{
+			if ([appDelegate respondsToSelector:sel_iOS9] && iOS9OrGreater)
+            {//:not currently implemented, may be for future AIR versions...
 				[AIRVK log:@"*** openURL:options detected, trying to hack it..."];
-				Method m = class_getInstanceMethod([appDelegate class], seliOS9);
-				__original_ApplicationOpenURLiOS9 = method_getImplementation(m);
-				method_setImplementation(m, (IMP)__swizzle_ApplicationOpenURLiOS9);
+				Method m = class_getInstanceMethod([appDelegate class], sel_iOS9);
+				original_ApplicationOpenURL_iOS9 = method_getImplementation(m);
+				method_setImplementation(m, (IMP)swizzle_ApplicationOpenURL_iOS9);
 			}
 			else
-			{
-				[AIRVK log:@"*** openURL:sourceApplication:annotation: detected, trying to hack it..."];
+            {//:AIR 30: CTAppController has application:openURL:sourceApplication:annotation: only
+                [AIRVK log:@"*** openURL:sourceApplication:annotation: detected, trying to hack it..."];
 				Method m = class_getInstanceMethod([appDelegate class], sel);
-				__original_ApplicationOpenURL = method_getImplementation(m);
-				method_setImplementation(m, (IMP)__swizzle_ApplicationOpenURL);
+				original_ApplicationOpenURL = method_getImplementation(m);
+				method_setImplementation(m, (IMP)swizzle_ApplicationOpenURL);
 			}
         });
     }

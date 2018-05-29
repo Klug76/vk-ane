@@ -44,7 +44,7 @@ static NSString* airVKAuthPermissionsKey = @"vkAuthPermissions";
 
 + (void) log:(NSString*) message {
     if( airVKLogEnabled ) {
-        //NSLog( @"[iOS-VK] %@", message );
+        NSLog( @"[iOS-VK] %@", message );
 		[AIRVK dispatchEvent:VK_LOG withMessage:message];
     }
 }
