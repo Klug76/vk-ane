@@ -23,6 +23,52 @@
 
 static AIRVKSdkDelegate* vkDelegateSharedInstance = nil;
 
+typedef BOOL (*applicationOpenURLPtr)(id, SEL, UIApplication*, NSURL*, NSString*, id);
+typedef BOOL (*applicationOpenURLiOS9Ptr)(id, SEL, UIApplication*, NSURL*, NSDictionary<NSString*, id>*);
+static IMP __original_ApplicationOpenURL = NULL;
+static IMP __original_ApplicationOpenURLiOS9 = NULL;
+
+
+BOOL __swizzle_ApplicationOpenURL(id self, SEL _cmd, UIApplication* application, NSURL* url, NSString* sourceApplication, id annotation)
+{
+	NSString* uri = url.absoluteString;
+	[AIRVK log:[NSString stringWithFormat:@"*** app openURL(old)=%@", uri]];
+	if ([uri hasPrefix:@"vk"])
+	{
+		return [VKSdk processOpenURL:url fromApplication:sourceApplication];
+	}
+
+    if (__original_ApplicationOpenURL)
+    {
+		[AIRVK log:@"*** openURL fallback(old)"];
+        return ((applicationOpenURLPtr)__original_ApplicationOpenURL)(self, _cmd, application, url, sourceApplication, annotation);
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+BOOL __swizzle_ApplicationOpenURLiOS9(id self, SEL _cmd, UIApplication* application, NSURL* url, NSDictionary<NSString*, id>* options)
+{
+	NSString* uri = url.absoluteString;
+	[AIRVK log:[NSString stringWithFormat:@"*** app openURL(new)=%@", uri]];
+	if ([uri hasPrefix:@"vk"])
+	{
+		return [VKSdk processOpenURL:url fromApplication:options[UIApplicationOpenURLOptionsSourceApplicationKey]];
+	}
+
+    if (__original_ApplicationOpenURLiOS9)
+    {
+		[AIRVK log:@"*** openURL fallback(new)"];
+        return ((applicationOpenURLiOS9Ptr)__original_ApplicationOpenURLiOS9)(self, _cmd, application, url, options);
+    }
+    else
+    {
+        return NO;
+    }
+}
+
 @implementation AIRVKSdkDelegate
 
 + (id) sharedInstance {
@@ -34,17 +80,44 @@ static AIRVKSdkDelegate* vkDelegateSharedInstance = nil;
 
 - (id) init {
     self = [super init];
-    
+
     if( self != nil ) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            id delegate = [[UIApplication sharedApplication] delegate];
-            if( delegate == nil ) {
+            __strong id appDelegate = [[UIApplication sharedApplication] delegate];
+            if( appDelegate == nil )
+			{
+				[AIRVK log:@"*** UIApplication delegate NOT found :("];
                 return;
             }
-            
-            Class adobeDelegateClass = object_getClass( delegate );
-            
+
+			BOOL iOS9OrGreater = [[[UIDevice currentDevice] systemVersion] intValue] >= 9;
+			SEL sel = @selector(application:openURL:sourceApplication:annotation:);
+			SEL seliOS9 = @selector(application:openURL:options:);
+
+			if ([appDelegate respondsToSelector:seliOS9] && iOS9OrGreater)
+			{
+				[AIRVK log:@"*** openURL:options detected, trying to hack it..."];
+				Method m = class_getInstanceMethod([appDelegate class], seliOS9);
+				__original_ApplicationOpenURLiOS9 = method_getImplementation(m);
+				method_setImplementation(m, (IMP)__swizzle_ApplicationOpenURLiOS9);
+			}
+			else
+			{
+				[AIRVK log:@"*** openURL:sourceApplication:annotation: detected, trying to hack it..."];
+				Method m = class_getInstanceMethod([appDelegate class], sel);
+				__original_ApplicationOpenURL = method_getImplementation(m);
+				method_setImplementation(m, (IMP)__swizzle_ApplicationOpenURL);
+			}
+        });
+    }
+
+    return self;
+}
+
+/* doesn't work
+            Class adobeDelegateClass = object_getClass( appDelegate );
+
             // Open URL iOS 9+
             if( NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_8_4 ) {
                 SEL delegateSelector = @selector(application:openURL:options:);
@@ -55,11 +128,6 @@ static AIRVKSdkDelegate* vkDelegateSharedInstance = nil;
                 SEL delegateSelector = @selector(application:openURL:sourceApplication:annotation:);
                 [self overrideDelegate:adobeDelegateClass method:delegateSelector withMethod:@selector(vkair_application:openURL:sourceApplication:annotation:)];
             }
-        });
-    }
-    
-    return self;
-}
 
 # pragma mark - Swizzled
 
@@ -78,29 +146,7 @@ static AIRVKSdkDelegate* vkDelegateSharedInstance = nil;
     }
     return NO;
 }
-
-# pragma mark - Private
-
-- (BOOL) overrideDelegate:(Class) delegateClass method:(SEL) delegateSelector withMethod:(SEL) swizzledSelector {
-    Method originalMethod = class_getInstanceMethod(delegateClass, delegateSelector);
-    Method swizzledMethod = class_getInstanceMethod([self class], swizzledSelector);
-    
-    BOOL didAddMethod =
-    class_addMethod(delegateClass,
-                    swizzledSelector,
-                    method_getImplementation(originalMethod),
-                    method_getTypeEncoding(originalMethod));
-    
-    if( didAddMethod ) {
-        class_replaceMethod(delegateClass,
-                            delegateSelector,
-                            method_getImplementation(swizzledMethod),
-                            method_getTypeEncoding(swizzledMethod));
-    } else {
-        method_exchangeImplementations(originalMethod, swizzledMethod);
-    }
-    return didAddMethod;
-}
+*/
 
 /**
  *
